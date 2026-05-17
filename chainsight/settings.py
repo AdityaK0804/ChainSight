@@ -156,7 +156,8 @@ if DATABASE_URL:
     )
 
 if not DEBUG:
-    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    # Immediately after SecurityMiddleware (index 1)
+    MIDDLEWARE.insert(2, 'whitenoise.middleware.WhiteNoiseMiddleware')
     STATIC_ROOT = BASE_DIR / 'staticfiles'
     STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
