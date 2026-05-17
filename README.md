@@ -2,6 +2,7 @@
 
 A full-stack Django web application that predicts supply chain disruptions using machine learning, tracks inventory risk in real time, and surfaces actionable alerts through a clean dashboard UI.
 
+**Live Demo:** https://chainsight-crre.onrender.com/
 ## Tech Stack
 
 | Layer | Technology |
