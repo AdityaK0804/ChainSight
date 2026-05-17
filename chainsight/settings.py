@@ -130,3 +130,35 @@ ACCOUNT_LOGOUT_ON_GET = True
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 CORS_ALLOW_CREDENTIALS = True
+
+# ── Production / cloud deployment (Render, etc.) ─────────────────────────
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if RENDER_EXTERNAL_HOSTNAME or DATABASE_URL:
+    _hosts = ['localhost', '127.0.0.1']
+    if RENDER_EXTERNAL_HOSTNAME:
+        _hosts.append(RENDER_EXTERNAL_HOSTNAME)
+    _hosts.extend(
+        h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()
+    )
+    ALLOWED_HOSTS = list(dict.fromkeys(_hosts))
+
+    if RENDER_EXTERNAL_HOSTNAME:
+        CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
+
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True,
+    )
+
+if not DEBUG:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STORAGES = {
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    }
