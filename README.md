@@ -1,4 +1,4 @@
-# ChainSight — AI-Powered Supply Chain Risk Dashboard
+# ChainSight - AI-Powered Supply Chain Risk Dashboard
 
 A full-stack Django web application that predicts supply chain disruptions using machine learning, tracks inventory risk in real time, and surfaces actionable alerts through a clean dashboard UI.
 
@@ -15,14 +15,14 @@ A full-stack Django web application that predicts supply chain disruptions using
 
 ## Features
 
-- **AI Risk Scoring** — Two ML models predict order delay probability and inventory stockout risk on demand
-- **Real-time Dashboard** — KPIs, 14-day demand forecast chart, and critical alert feed
-- **Inventory Management** — Searchable, filterable product table with color-coded risk indicators
-- **Smart Alerts** — Auto-generated risk alerts (critical/warning/info) with one-click resolution
-- **CSV Import** — Bulk upload inventory data with drag-and-drop, with import summary
-- **ML Insights** — Feature importance charts and model accuracy metrics
-- **REST API** — 7 DRF endpoints for all data models with pagination and filtering
-- **Social Login** — Google and Microsoft OAuth via django-allauth
+- **AI Risk Scoring** - Two ML models predict order delay probability and inventory stockout risk on demand
+- **Real-time Dashboard** - KPIs, 14-day demand forecast chart, and critical alert feed
+- **Inventory Management** - Searchable, filterable product table with color-coded risk indicators
+- **Smart Alerts** - Auto-generated risk alerts (critical/warning/info) with one-click resolution
+- **CSV Import** - Bulk upload inventory data with drag-and-drop, with import summary
+- **ML Insights** - Feature importance charts and model accuracy metrics
+- **REST API** - 7 DRF endpoints for all data models with pagination and filtering
+- **Social Login** - Google and Microsoft OAuth via django-allauth
 
 ## Quick Start
 
@@ -43,7 +43,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Visit http://127.0.0.1:8000 — sign up or log in to see the dashboard.
+Visit http://127.0.0.1:8000 - sign up or log in to see the dashboard.
 
 ## Project Structure
 
@@ -86,4 +86,4 @@ Models auto-train on first run using synthetic data and are cached as .pkl files
 
 ## Built By
 
-Aditya Kumar — adityavinoddas@gmail.com
+Aditya Kumar - adityavinoddas@gmail.com
