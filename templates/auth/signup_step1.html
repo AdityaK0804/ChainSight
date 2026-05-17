@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+{% load static %}
+{% block title %}Sign Up — ChainSight{% endblock %}
+
+{% block body %}
+<div class="flex min-h-screen">
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="hidden lg:flex w-1/2 relative overflow-hidden" style="background: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDlpqPNobimv5UcZss2yGZSFefnIcLisQ6TMsEbfWgi7lWU2l_HIecJUIPb0sn_xse7Z6qj7bpvmBRkJhd-kSwhKbhR9IqVDbK5-Ch9D0Kls-lKly6wXYJQmZMk5mTOBlpTK7GkhMMKeRXVcFIZmVEgapHgUEgvoggN4S-nRGcn2tlVLpfjgZN4hFbj38pPkkh1ZMpGd0CD-IJPM-I2-lyLHiexbaFghLVLV1KstMiSaCxqp0h3rrs89m4iWizKQ6_I7FRE-JD8GiE') center/cover no-repeat;">
+    <div class="absolute inset-0 bg-background/30 backdrop-blur-[2px]"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-end p-12 h-full w-full">
+      <div class="glass-panel p-8 rounded-xl">
+        <p class="font-headline text-[28px] font-semibold text-on-surface mb-2 leading-tight">"The art of simplicity is a puzzle of complexity."</p>
+        <p class="text-base text-on-surface-variant font-body">Transforming supply chain chaos into strategic clarity.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-surface-container-low relative">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+
+    <div class="w-full max-w-md mx-auto relative z-10">
+      <!-- Progress bar -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="h-1.5 w-12 rounded-full bg-secondary shadow-[0_0_12px_rgba(189,194,255,0.4)]"></div>
+        <div class="h-1.5 w-12 rounded-full bg-surface-variant"></div>
+      </div>
+      <p class="font-mono text-xs text-on-surface-variant uppercase tracking-widest mb-8">Step 1 of 2</p>
+
+      <div class="mb-8">
+        <h1 class="font-display text-3xl font-bold text-on-surface mb-2 tracking-tight">Welcome to the future of logistics</h1>
+        <p class="text-base text-on-surface-variant">Create your account to get started.</p>
+      </div>
+
+      {% if form.errors %}
+      <div class="mb-4 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm">
+        {% for error in form.non_field_errors %}{{ error }}<br/>{% endfor %}
+        {% for field in form %}{% for error in field.errors %}<span>{{ field.label }}: {{ error }}</span><br/>{% endfor %}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'signup_step1' %}" class="space-y-4">
+        {% csrf_token %}
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">person</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="full_name" type="text" placeholder="Full Name" value="{{ form.full_name.value|default:'' }}" required />
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">email</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="email" type="email" placeholder="Work Email" value="{{ form.email.value|default:'' }}" required />
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="password" type="password" placeholder="Password (8+ characters)" required />
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="confirm_password" type="password" placeholder="Confirm Password" required />
+        </div>
+        <button type="submit" class="w-full mt-6 bg-gradient-to-r from-secondary-container to-[#008f85] text-white font-mono text-xs py-4 rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest font-bold">
+          Continue
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </button>
+      </form>
+
+      <div class="my-8 flex items-center gap-4">
+        <hr class="flex-grow border-outline-variant/30" />
+        <span class="font-mono text-[11px] text-on-surface-variant uppercase tracking-widest font-bold">Or sign up with</span>
+        <hr class="flex-grow border-outline-variant/30" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <a href="#" onclick="alert('Social login coming soon')" class="flex justify-center items-center gap-2 py-3 px-4 rounded-lg border border-outline-variant/30 bg-surface-container hover:bg-surface-variant transition-colors text-on-surface font-mono text-xs uppercase tracking-wider font-semibold">
+          <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASuFCYDo6S6Yu7fR_ewjdtb08JUwK_Xs4jM-76hu2vyOvFu2ILSNQ0DyXXNsoZWl7vSqRCRpE0i74MEaLtDUYIM1QpcMMbdE1hpt9qWaphKQy7Z2NtCFgSd0ERt2wwyaUsK9dfDn6SIF0Rk9cDWTkoAYI8MoGp7B0NammgzaBF1ucr5wTVKuw0yTivRJGBllNaGOHjtYoD3dqwLva0nymR2kFQLj87Yt2WM9gnZJIuav2dxGF4XDebQDSE5vZkajXd17_WgH_bds4"/> Google
+        </a>
+        <a href="#" onclick="alert('Social login coming soon')" class="flex justify-center items-center gap-2 py-3 px-4 rounded-lg border border-outline-variant/30 bg-surface-container hover:bg-surface-variant transition-colors text-on-surface font-mono text-xs uppercase tracking-wider font-semibold">
+          <img alt="Microsoft" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb2sQ-93z9A0qK15xjtC0U3DGtX-nTwrWYcV_xZrfoY0uaB73jWe0uFcX73gozRfA2hVeRF94yTAi7jen1sSOUg7XVY99AVmR2bu1jJu3EzSD2hWDeFJaO33zP7_Bg9aKeMEstTpct32W_uLR-BQUWKo8ymZ8x8jgVbXpnmkxmnmshWpEgHFKXwjoMylQnDvNsSJ1ma5QYCELw1xFonsVctBf5W3cYIECv1ucNPtumcYR7fQCHiz3-Z2S8RRAMo1Njp-DQaP1a7O8"/> Microsoft
+        </a>
+      </div>
+
+      <p class="mt-8 text-center text-sm text-on-surface-variant">
+        Already have an account?
+        <a class="text-secondary hover:underline font-bold" href="{% url 'login' %}">Log In</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

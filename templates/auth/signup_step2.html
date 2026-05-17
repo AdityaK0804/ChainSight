@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sign Up — Step 2 — ChainSight{% endblock %}
+
+{% block body %}
+<div class="flex min-h-screen">
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="hidden lg:flex w-1/2 relative overflow-hidden" style="background: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDlpqPNobimv5UcZss2yGZSFefnIcLisQ6TMsEbfWgi7lWU2l_HIecJUIPb0sn_xse7Z6qj7bpvmBRkJhd-kSwhKbhR9IqVDbK5-Ch9D0Kls-lKly6wXYJQmZMk5mTOBlpTK7GkhMMKeRXVcFIZmVEgapHgUEgvoggN4S-nRGcn2tlVLpfjgZN4hFbj38pPkkh1ZMpGd0CD-IJPM-I2-lyLHiexbaFghLVLV1KstMiSaCxqp0h3rrs89m4iWizKQ6_I7FRE-JD8GiE') center/cover no-repeat;">
+    <div class="absolute inset-0 bg-background/30 backdrop-blur-[2px]"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-end p-12 h-full w-full">
+      <div class="glass-panel p-8 rounded-xl">
+        <p class="font-headline text-[28px] font-semibold text-on-surface mb-2 leading-tight">"The art of simplicity is a puzzle of complexity."</p>
+        <p class="text-base text-on-surface-variant font-body">Transforming supply chain chaos into strategic clarity.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-surface-container-low relative">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+
+    <div class="w-full max-w-md mx-auto relative z-10">
+      <!-- Progress bar -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="h-1.5 w-12 rounded-full bg-secondary/40"></div>
+        <div class="h-1.5 w-12 rounded-full bg-secondary shadow-[0_0_12px_rgba(189,194,255,0.4)]"></div>
+      </div>
+      <p class="font-mono text-xs text-on-surface-variant uppercase tracking-widest mb-8">Step 2 of 2</p>
+
+      <div class="mb-8">
+        <h1 class="font-display text-3xl font-bold text-on-surface mb-2 tracking-tight">Tell us about your organization</h1>
+        <p class="text-base text-on-surface-variant">This helps us tailor ChainSight to your needs.</p>
+      </div>
+
+      {% if form.errors %}
+      <div class="mb-4 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm">
+        {% for field in form %}{% for error in field.errors %}{{ error }}<br/>{% endfor %}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'signup_step2' %}" class="space-y-4">
+        {% csrf_token %}
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">business</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="company_name" type="text" placeholder="Company Name" required />
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">badge</span>
+          <select name="role" class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all appearance-none" required>
+            {% for val, label in form.fields.role.choices %}
+            <option value="{{ val }}" class="bg-surface-container">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">groups</span>
+          <select name="team_size" class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all appearance-none" required>
+            {% for val, label in form.fields.team_size.choices %}
+            <option value="{{ val }}" class="bg-surface-container">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">public</span>
+          <input class="w-full bg-surface-container border border-outline-variant/30 text-on-surface rounded-lg py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 name="country" type="text" placeholder="Country" required />
+        </div>
+        <button type="submit" class="w-full mt-6 bg-gradient-to-r from-secondary-container to-[#008f85] text-white font-mono text-xs py-4 rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest font-bold">
+          Create Account
+          <span class="material-symbols-outlined text-lg">check_circle</span>
+        </button>
+      </form>
+
+      <p class="mt-8 text-center text-sm text-on-surface-variant">
+        <a class="text-secondary hover:underline font-bold" href="{% url 'signup_step1' %}">← Back to Step 1</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

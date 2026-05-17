@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% load socialaccount %}
+{% block title %}Log In — ChainSight{% endblock %}
+
+{% block body %}
+<div class="flex min-h-screen">
+  <!-- ═══ LEFT PANEL — Visual ═══ -->
+  <div class="hidden lg:flex w-1/2 relative bg-surface-container overflow-hidden">
+    <img alt="Abstract calming visualization" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" data-alt="A serene, abstract digital visualization representing data flow and logistics. Soft, sweeping curves of deep navy and vibrant teal light overlap in a smooth, continuous motion, creating a sense of calm efficiency. The aesthetic is high-tech but approachable, avoiding harsh mechanical lines in favor of fluid, glass-like textures. The overall mood is sophisticated, reliable, and gently luminous against a dark charcoal background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA97xIvCh7QPnLwt0NM7x0pi2aZFx7YLIpVKUkmB0uSOkLh69OlpcfRlH-82VdSQr5EerfAwGae3apm7zHBXx4XZFfvEPOyaIEG-bUKbg9qedFhM0klbRy5_TRXe1m2aVhoHHARPjN2K_t99PmvkVR-2QiY0vKpBrDt_Cj1tSSEUtlZji_67xDhW_7_41IX72Ps7XqGCryheNUy1SgOGGik2o7KPcLAXiUAaSrv_hy3bRbL1whbQSFe-EI1AsLZgQ5V19LcEUyappE"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-end p-12 h-full w-full">
+      <div class="glass-panel p-8 rounded-xl">
+        <p class="font-headline text-[28px] font-semibold text-on-surface mb-2 leading-tight">"Clarity is the ultimate sophisticated calm."</p>
+        <p class="text-base text-on-surface-variant font-body">Reducing cognitive load in global supply chains.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL — Login Form ═══ -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-surface-container-low relative">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+
+    <div class="w-full max-w-md mx-auto relative z-10">
+      <div class="mb-10">
+        <h1 class="font-display text-4xl font-bold text-primary flex items-center gap-2 mb-2 tracking-tight">
+          <span class="material-symbols-outlined text-secondary text-4xl icon-fill">hub</span>
+          ChainSight
+        </h1>
+        <p class="text-base text-on-surface-variant font-body">Welcome back. Please enter your details.</p>
+      </div>
+
+      {% if form.errors %}
+      <div class="mb-4 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block font-mono text-xs text-on-surface mb-2 uppercase tracking-widest font-semibold" for="id_username">Email</label>
+          <input class="w-full bg-surface-container-highest border border-outline-variant/30 text-on-surface rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 id="id_username" name="username" type="text" placeholder="Enter your email" required />
+        </div>
+        <div>
+          <label class="block font-mono text-xs text-on-surface mb-2 uppercase tracking-widest font-semibold" for="id_password">Password</label>
+          <input class="w-full bg-surface-container-highest border border-outline-variant/30 text-on-surface rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all placeholder:text-on-surface-variant/40"
+                 id="id_password" name="password" type="password" placeholder="••••••••" required />
+        </div>
+        <div class="flex items-center justify-between mt-4">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input class="rounded bg-surface-container-highest border-outline-variant/50 text-secondary focus:ring-secondary" type="checkbox" />
+            <span class="font-mono text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">Stay logged in</span>
+          </label>
+          <a class="font-mono text-xs text-secondary hover:text-on-secondary-container transition-colors font-semibold" href="#">Forgot Password?</a>
+        </div>
+        <input type="hidden" name="next" value="{% url 'dashboard' %}" />
+        <button type="submit" class="w-full mt-8 bg-gradient-to-r from-secondary-container to-[#008f85] text-white font-mono text-xs py-4 rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest font-bold">
+          Sign In
+        </button>
+      </form>
+
+      <div class="my-8 flex items-center gap-4">
+        <hr class="flex-grow border-outline-variant/30" />
+        <span class="font-mono text-[11px] text-on-surface-variant uppercase tracking-widest font-bold">Or continue with</span>
+        <hr class="flex-grow border-outline-variant/30" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <a href="{% provider_login_url 'google' %}"
+           class="w-full flex items-center justify-center gap-3 border border-outline-variant rounded-full py-3 px-6 text-on-surface font-mono text-xs uppercase tracking-wider font-bold hover:bg-surface-container transition-colors col-span-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </a>
+        <a href="#" onclick="alert('Social login coming soon')" class="flex justify-center items-center gap-2 py-3 px-4 rounded-lg border border-outline-variant/30 bg-surface-container hover:bg-surface-variant transition-colors text-on-surface font-mono text-xs uppercase tracking-wider font-semibold">
+          <img alt="Microsoft" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb2sQ-93z9A0qK15xjtC0U3DGtX-nTwrWYcV_xZrfoY0uaB73jWe0uFcX73gozRfA2hVeRF94yTAi7jen1sSOUg7XVY99AVmR2bu1jJu3EzSD2hWDeFJaO33zP7_Bg9aKeMEstTpct32W_uLR-BQUWKo8ymZ8x8jgVbXpnmkxmnmshWpEgHFKXwjoMylQnDvNsSJ1ma5QYCELw1xFonsVctBf5W3cYIECv1ucNPtumcYR7fQCHiz3-Z2S8RRAMo1Njp-DQaP1a7O8"/> Microsoft
+        </a>
+      </div>
+
+      <p class="mt-8 text-center text-base text-on-surface-variant">
+        Don't have an account?
+        <a class="text-secondary hover:underline font-bold transition-colors" href="{% url 'signup_step1' %}">Sign Up</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

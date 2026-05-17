@@ -1,0 +1,66 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Suppliers — ChainSight{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+  <div>
+    <h2 class="font-headline text-[32px] text-on-surface mb-1 font-semibold tracking-tight">Suppliers</h2>
+    <p class="text-base text-on-surface-variant font-body">{{ total }} suppliers · {{ high_risk }} high risk</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+{% for s in suppliers %}
+<div class="bg-surface-container border border-outline-variant rounded-2xl p-6 hover:border-primary/30 transition-all soft-elevation">
+  <div class="flex items-start justify-between mb-4">
+    <div>
+      <h3 class="font-headline text-lg font-semibold text-on-surface leading-tight">{{ s.name }}</h3>
+      <p class="text-sm text-on-surface-variant font-mono uppercase tracking-wider mt-0.5">{{ s.country }}</p>
+    </div>
+    <span class="inline-flex px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border
+      {% if s.risk_level == 'low' %}bg-success/10 text-success border-success/20
+      {% elif s.risk_level == 'medium' %}bg-warning/10 text-warning border-warning/20
+      {% else %}bg-error/10 text-error border-error/20{% endif %}">
+      {{ s.risk_level }} risk
+    </span>
+  </div>
+
+  <div class="space-y-3">
+    <div>
+      <div class="flex justify-between text-xs text-on-surface-variant font-mono mb-1">
+        <span>On-time delivery</span>
+        <span>{{ s.on_time_delivery_rate|floatformat:0 }}%</span>
+      </div>
+      <div class="h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+        <div class="h-full rounded-full {% if s.on_time_delivery_rate >= 0.9 %}bg-success{% elif s.on_time_delivery_rate >= 0.75 %}bg-warning{% else %}bg-error{% endif %}"
+             style="width:{{ s.on_time_delivery_rate|floatformat:0 }}%"></div>
+      </div>
+    </div>
+
+    <div class="flex justify-between text-sm">
+      <span class="text-on-surface-variant">Lead time</span>
+      <span class="font-mono text-on-surface font-bold">{{ s.lead_time_days }}d</span>
+    </div>
+    <div class="flex justify-between text-sm">
+      <span class="text-on-surface-variant">Avg delay</span>
+      <span class="font-mono text-on-surface font-bold">{{ s.average_delay_days|floatformat:1 }}d</span>
+    </div>
+    <div class="flex justify-between text-sm">
+      <span class="text-on-surface-variant">Total orders</span>
+      <span class="font-mono text-on-surface font-bold">{{ s.order_count }}</span>
+    </div>
+    <div class="flex justify-between text-sm">
+      <span class="text-on-surface-variant">Delayed orders</span>
+      <span class="font-mono {% if s.delayed_count > 0 %}text-error{% else %}text-success{% endif %} font-bold">{{ s.delayed_count }}</span>
+    </div>
+  </div>
+
+  <div class="mt-4 pt-4 border-t border-outline-variant">
+    <a href="mailto:{{ s.contact_email }}" class="text-sm text-primary font-mono hover:underline truncate block">{{ s.contact_email }}</a>
+  </div>
+</div>
+{% empty %}
+<div class="col-span-3 text-center py-16 text-on-surface-variant">No suppliers found.</div>
+{% endfor %}
+</div>
+{% endblock %}

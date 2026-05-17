@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="flex h-screen overflow-hidden bg-background">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="w-72 flex-shrink-0 border-r border-outline-variant bg-surface flex flex-col h-full z-20">
+    <a href="{% url 'dashboard' %}" class="px-6 py-8 flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <span class="material-symbols-outlined text-primary text-4xl icon-fill">all_inclusive</span>
+      <div>
+        <h1 class="font-headline text-2xl font-semibold text-primary tracking-tight leading-tight">ChainSight</h1>
+        <p class="text-sm text-on-surface-variant font-body">Global Operations</p>
+      </div>
+    </a>
+
+    <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+      {% url 'dashboard' as dashboard_url %}
+      {% url 'products' as products_url %}
+      {% url 'suppliers' as suppliers_url %}
+      {% url 'upload' as upload_url %}
+      {% url 'alerts' as alerts_url %}
+      {% url 'insights' as insights_url %}
+
+      <a href="{{ dashboard_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == dashboard_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">dashboard</span>
+        <span class="text-base">Dashboard</span>
+      </a>
+      <a href="{{ products_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == products_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">inventory_2</span>
+        <span class="text-base">Products</span>
+      </a>
+      <a href="{{ suppliers_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == suppliers_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">storefront</span>
+        <span class="text-base">Suppliers</span>
+      </a>
+      <a href="{{ upload_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == upload_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">upload_file</span>
+        <span class="text-base">Upload Sales</span>
+      </a>
+      <a href="{{ alerts_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == alerts_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">notifications_active</span>
+        <span class="text-base flex-1">Alerts</span>
+        {% if unresolved_alert_count %}
+        <span data-alert-count class="bg-error text-on-error text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">{{ unresolved_alert_count }}</span>
+        {% endif %}
+      </a>
+      <a href="{{ insights_url }}" class="flex items-center gap-4 px-4 py-3 rounded-full font-medium transition-colors duration-200 {% if request.path == insights_url %}text-primary bg-surface-container-high{% else %}text-on-surface-variant hover:text-on-surface hover:bg-surface-container{% endif %}">
+        <span class="material-symbols-outlined text-2xl">analytics</span>
+        <span class="text-base">ML Insights</span>
+      </a>
+    </nav>
+
+    <div class="p-6 border-t border-outline-variant bg-surface-container-low mt-auto">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0 text-white font-headline text-sm font-bold">
+          {{ request.user.first_name|first|default:"U" }}
+        </div>
+        <div class="overflow-hidden">
+          <p class="text-on-surface font-medium truncate text-sm">{{ request.user.get_full_name|default:"Ops User" }}</p>
+          <p class="text-on-surface-variant text-xs truncate font-mono uppercase">{{ request.user.email|default:"user@company.com" }}</p>
+        </div>
+        <a href="{% url 'account_logout' %}" class="ml-auto text-on-surface-variant hover:text-on-surface flex items-center justify-center p-1 rounded-full hover:bg-surface-container-high transition-colors" title="Logout">
+          <span class="material-symbols-outlined text-xl">logout</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- Top Bar -->
+    <header class="flex-shrink-0 border-b border-outline-variant bg-surface flex justify-between items-center h-16 px-8 z-10">
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-6">
+        <form method="get" action="/products/" id="topbar-search-form" class="relative hidden lg:block w-64">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">search</span>
+          <input name="q" id="topbar-search-input"
+                 class="w-full bg-surface-container border border-outline-variant rounded-full px-4 py-2 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-sm pl-10 placeholder:text-outline transition-colors"
+                 placeholder="Search products, alerts..." type="text" autocomplete="off" />
+        </form>
+        <div class="flex items-center gap-2 border-l border-outline-variant pl-6">
+          <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-2xl">settings</span>
+          </button>
+          <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-2xl">help_outline</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 overflow-y-auto p-8">
+      <div class="max-w-[1600px] mx-auto space-y-8 pb-12">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

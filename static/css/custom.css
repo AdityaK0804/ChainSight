@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ChainSight — Custom Styles
+   Supplements Tailwind CDN with effects that can't be expressed via utilities.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Glassmorphism Panel ──────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(15, 29, 42, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Soft Elevation (card depth) ──────────────────────────────────────── */
+.soft-elevation {
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+/* ── Scroll-reveal animation ──────────────────────────────────────────── */
+.reveal-on-scroll {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* ── Custom scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #434655;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8d90a0;
+}
+
+/* ── Smooth focus transitions ─────────────────────────────────────────── */
+input:focus,
+select:focus,
+textarea:focus {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ── Skeleton shimmer ─────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #122131 25%, #1c2b3c 50%, #122131 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ── Primary glow on hover ────────────────────────────────────────────── */
+.glow-primary:hover {
+  box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
+}
+
+/* ── Chart tooltip dark theme override ────────────────────────────────── */
+.chartjs-tooltip {
+  background: #273647 !important;
+  border: 1px solid #434655 !important;
+  border-radius: 12px !important;
+}

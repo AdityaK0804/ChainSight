@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="dark scroll-smooth" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{% block title %}ChainSight{% endblock %}</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Manrope:wght@600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{% static 'css/custom.css' %}"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "background": "#051424",
+        "surface": "#051424",
+        "surface-dim": "#051424",
+        "surface-bright": "#2c3a4c",
+        "surface-container-lowest": "#010f1f",
+        "surface-container-low": "#0d1c2d",
+        "surface-container": "#122131",
+        "surface-container-high": "#1c2b3c",
+        "surface-container-highest": "#273647",
+        "surface-variant": "#273647",
+        "surface-tint": "#b4c5ff",
+        "inverse-surface": "#d4e4fa",
+        "on-surface": "#d4e4fa",
+        "on-surface-variant": "#c3c6d7",
+        "on-background": "#d4e4fa",
+        "inverse-on-surface": "#233143",
+        "outline": "#8d90a0",
+        "outline-variant": "#434655",
+        "primary": "#b4c5ff",
+        "primary-container": "#2563eb",
+        "on-primary": "#002a78",
+        "on-primary-container": "#eeefff",
+        "on-primary-fixed": "#00174b",
+        "on-primary-fixed-variant": "#003ea8",
+        "inverse-primary": "#0053db",
+        "secondary": "#bdc2ff",
+        "secondary-container": "#2f3aa3",
+        "on-secondary": "#131e8c",
+        "on-secondary-container": "#a8afff",
+        "tertiary": "#ffb596",
+        "tertiary-container": "#bc4800",
+        "on-tertiary": "#581e00",
+        "on-tertiary-container": "#ffede6",
+        "error": "#ffb4ab",
+        "error-container": "#93000a",
+        "on-error": "#690005",
+        "on-error-container": "#ffdad6",
+        "warning": "#f59e0b",
+        "success": "#34d399",
+      },
+      fontFamily: {
+        "display": ["Inter", "sans-serif"],
+        "headline": ["Inter", "sans-serif"],
+        "body": ["Inter", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"],
+      },
+      borderRadius: {
+        "sm": "0.5rem",
+        "DEFAULT": "1rem",
+        "lg": "2rem",
+        "xl": "3rem",
+        "full": "9999px",
+      },
+    },
+  },
+};
+</script>
+<style>
+  body { 
+    font-family: 'Inter', sans-serif; 
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+  .icon-fill { font-variation-settings: 'FILL' 1; }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body class="bg-background text-on-background antialiased">
+{% block body %}{% endblock %}
+
+<div id="toast-container" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+
+<script>
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+function showToast(msg, type) {
+  const t = type || 'success';
+  const colors = { success: ['#122131','#b4c5ff'], error: ['#93000a','#ffb4ab'] };
+  const [bg, text] = colors[t] || colors.success;
+  const el = document.createElement('div');
+  el.style.cssText = `background:${bg};color:${text};padding:12px 20px;border-radius:999px;font-size:13px;font-family:monospace;font-weight:500;letter-spacing:0.03em;pointer-events:auto;box-shadow:0 4px 20px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:all 0.25s ease;max-width:360px;`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+  setTimeout(() => {
+    el.style.opacity = '0'; el.style.transform = 'translateY(8px)';
+    setTimeout(() => el.remove(), 280);
+  }, 3500);
+}
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

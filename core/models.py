@@ -1,0 +1,192 @@
+"""
+ChainSight Core Models
+Supply chain risk management data models.
+"""
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+
+class Supplier(models.Model):
+    """A supplier/vendor providing goods to the supply chain."""
+
+    RELIABILITY_CHOICES = [
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low'),
+    ]
+
+    name = models.CharField(max_length=255)
+    country = models.CharField(max_length=100)
+    contact_email = models.EmailField()
+    reliability_rating = models.CharField(
+        max_length=10, choices=RELIABILITY_CHOICES, default='medium'
+    )
+    lead_time_days = models.PositiveIntegerField(default=7)
+    on_time_delivery_rate = models.FloatField(
+        default=0.85,
+        help_text="Fraction 0.0–1.0 representing on-time delivery percentage."
+    )
+    average_delay_days = models.FloatField(default=0.0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.country})"
+
+    @property
+    def risk_level(self):
+        if self.on_time_delivery_rate >= 0.9 and self.average_delay_days <= 1:
+            return 'low'
+        elif self.on_time_delivery_rate >= 0.75 and self.average_delay_days <= 3:
+            return 'medium'
+        return 'high'
+
+
+class InventoryItem(models.Model):
+    """A product or material tracked in inventory."""
+
+    CATEGORY_CHOICES = [
+        ('raw_material', 'Raw Material'),
+        ('component', 'Component'),
+        ('finished_good', 'Finished Good'),
+        ('packaging', 'Packaging'),
+    ]
+
+    name = models.CharField(max_length=255)
+    sku = models.CharField(max_length=50, unique=True, db_index=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='inventory_items'
+    )
+    current_stock = models.PositiveIntegerField(default=0)
+    reorder_point = models.PositiveIntegerField(default=50)
+    reorder_quantity = models.PositiveIntegerField(default=200)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    stockout_risk_score = models.FloatField(default=0.0)
+    last_risk_updated = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.sku} — {self.name}"
+
+    @property
+    def stock_status(self):
+        if self.current_stock == 0:
+            return 'out_of_stock'
+        elif self.current_stock <= self.reorder_point:
+            return 'low'
+        return 'ok'
+
+    @property
+    def stock_value(self):
+        return float(self.unit_cost) * self.current_stock
+
+
+class Order(models.Model):
+    """A purchase order placed with a supplier."""
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('in_transit', 'In Transit'),
+        ('delayed', 'Delayed'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    order_number = models.CharField(max_length=50, unique=True, db_index=True)
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.CASCADE, related_name='orders'
+    )
+    item = models.ForeignKey(
+        InventoryItem, on_delete=models.CASCADE, related_name='orders'
+    )
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    order_date = models.DateField(default=timezone.now)
+    expected_delivery = models.DateField()
+    actual_delivery = models.DateField(null=True, blank=True)
+    delay_risk_score = models.FloatField(default=0.0)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='orders'
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.order_number} — {self.item.sku}"
+
+    @property
+    def total_value(self):
+        return self.quantity * self.unit_price
+
+    @property
+    def is_overdue(self):
+        if self.status in ('delivered', 'cancelled'):
+            return False
+        return timezone.now().date() > self.expected_delivery
+
+    @property
+    def delay_days(self):
+        if self.actual_delivery and self.expected_delivery:
+            delta = (self.actual_delivery - self.expected_delivery).days
+            return max(0, delta)
+        if self.is_overdue:
+            return (timezone.now().date() - self.expected_delivery).days
+        return 0
+
+
+class RiskAlert(models.Model):
+    """An actionable risk alert generated by the ML engine or manually."""
+
+    ALERT_TYPE_CHOICES = [
+        ('stockout', 'Stockout Risk'),
+        ('delay', 'Delivery Delay'),
+        ('supplier', 'Supplier Risk'),
+        ('cost', 'Cost Anomaly'),
+    ]
+
+    SEVERITY_CHOICES = [
+        ('info', 'Info'),
+        ('warning', 'Warning'),
+        ('critical', 'Critical'),
+    ]
+
+    alert_type = models.CharField(max_length=15, choices=ALERT_TYPE_CHOICES)
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    related_order = models.ForeignKey(
+        Order, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='alerts'
+    )
+    related_item = models.ForeignKey(
+        InventoryItem, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='alerts'
+    )
+    related_supplier = models.ForeignKey(
+        Supplier, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='alerts'
+    )
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.severity}] {self.title}"

@@ -1,0 +1,378 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Dashboard — ChainSight{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+  <div>
+    <h2 class="font-headline text-[32px] text-on-surface mb-1 font-semibold tracking-tight">Operations Overview</h2>
+    <p class="text-base text-on-surface-variant font-body">Real-time supply chain monitoring and forecasting.</p>
+  </div>
+  <div class="flex gap-3">
+    <button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface font-mono text-xs uppercase tracking-wider font-bold hover:bg-surface-container transition-colors flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">calendar_today</span> Last 30 Days
+    </button>
+    <button class="px-4 py-2 rounded-full bg-primary text-on-primary font-mono text-xs uppercase tracking-wider font-bold hover:bg-primary/90 transition-colors flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">download</span> Export Report
+    </button>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- Products -->
+  <div class="bg-surface-container border border-outline-variant rounded-2xl p-6 flex flex-col justify-between hover:border-primary/50 transition-colors group soft-elevation">
+    <div class="flex justify-between items-start mb-4">
+      <span class="font-mono text-xs text-on-surface-variant uppercase tracking-wider">Total Active Products</span>
+      <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined">inventory_2</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="font-display text-[40px] font-bold text-on-surface leading-none">{{ total_products }}</span>
+      <span class="text-sm text-on-surface-variant">across {{ total_products|divisibleby:3|yesno:"multiple,various" }} categories</span>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="bg-surface-container border border-outline-variant rounded-2xl p-6 flex flex-col justify-between hover:border-error/50 transition-colors group soft-elevation">
+    <div class="flex justify-between items-start mb-4">
+      <span class="font-mono text-xs text-on-surface-variant uppercase tracking-wider">Active Reorder Alerts</span>
+      <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error group-hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined">warning</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="font-display text-[40px] font-bold text-error leading-none">{{ active_alerts }}</span>
+      <div class="flex items-center text-error bg-error/10 px-2.5 py-1 rounded-full">
+        <span class="material-symbols-outlined text-base">arrow_upward</span>
+        <span class="font-mono text-[11px] ml-1 uppercase font-bold">+{{ active_alerts }} this week</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accuracy -->
+  <div class="bg-surface-container border border-outline-variant rounded-2xl p-6 flex flex-col justify-between hover:border-primary/50 transition-colors group soft-elevation">
+    <div class="flex justify-between items-start mb-4">
+      <span class="font-mono text-xs text-on-surface-variant uppercase tracking-wider">Avg Forecast Accuracy</span>
+      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined">analytics</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="font-display text-[40px] font-bold text-primary leading-none">{{ forecast_accuracy }}%</span>
+      <div class="flex items-center text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+        <span class="material-symbols-outlined text-base">arrow_upward</span>
+        <span class="font-mono text-[11px] ml-1 uppercase font-bold">1.4%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forecast Chart -->
+<div class="bg-surface-container border border-outline-variant rounded-2xl p-6 lg:p-8 soft-elevation">
+  <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-outline-variant">
+    <h3 class="font-headline text-2xl text-on-surface font-semibold tracking-tight">14-Day Demand Forecast</h3>
+    <div class="flex gap-6 mt-2 md:mt-0">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 bg-primary rounded-full"></div>
+        <span class="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Historical</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 border-2 border-dashed rounded-full" style="border-color:#22d3ee"></div>
+        <span class="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Predicted</span>
+      </div>
+    </div>
+  </div>
+  <div class="h-[360px] w-full">
+    <canvas id="forecastChart"></canvas>
+  </div>
+</div>
+
+<!-- Bottom Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+  <!-- Critical Alerts -->
+  <div class="xl:col-span-2 flex flex-col gap-4">
+    <div class="flex justify-between items-end mb-2">
+      <h3 class="font-headline text-2xl text-on-surface font-semibold tracking-tight">Critical Alerts</h3>
+      <a href="{% url 'alerts' %}" class="text-primary font-mono text-xs uppercase tracking-wider font-bold hover:underline">View All Alerts</a>
+    </div>
+
+    {% for alert in critical_alerts %}
+    <div class="bg-surface-container border border-outline-variant rounded-2xl p-5 flex items-center justify-between gap-4 hover:border-error/30 transition-colors" id="alert-card-{{ alert.id }}">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 mt-1
+          {% if alert.alert_type == 'stockout' %}bg-warning/10 text-warning{% elif alert.alert_type == 'delay' %}bg-error/10 text-error{% else %}bg-primary/10 text-primary{% endif %}">
+          <span class="material-symbols-outlined">
+            {% if alert.alert_type == 'stockout' %}inventory_2{% elif alert.alert_type == 'delay' %}local_shipping{% else %}warning{% endif %}
+          </span>
+        </div>
+        <div>
+          <div class="flex items-center gap-3 mb-1">
+            <h4 class="font-headline text-lg font-semibold text-on-surface">
+              {% if alert.related_item %}{{ alert.related_item.sku }}{% else %}{{ alert.title }}{% endif %}
+            </h4>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border
+              {% if alert.severity == 'critical' %}bg-error/10 text-error border-error/20{% else %}bg-warning/10 text-warning border-warning/20{% endif %}">
+              {{ alert.get_severity_display }}
+            </span>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">{{ alert.message }}</p>
+        </div>
+      </div>
+      <button onclick="resolveAlert({{ alert.id }}, this.closest('[id^=alert-card]'))"
+              class="px-5 py-2 rounded-full border border-outline-variant text-on-surface font-mono text-xs uppercase tracking-wider font-bold hover:bg-surface-container-high transition-colors whitespace-nowrap">
+        Review
+      </button>
+    </div>
+    {% empty %}
+    <div class="bg-surface-container border border-outline-variant rounded-2xl p-12 text-center glass-panel">
+      <span class="material-symbols-outlined text-5xl mb-2 text-success">check_circle</span>
+      <p class="text-lg font-semibold text-on-surface">Operations Clear</p>
+      <p class="text-sm text-on-surface-variant mt-1">No active critical alerts detected.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Data Actions -->
+  <div class="flex flex-col gap-6">
+    <div class="mb-[-8px]">
+      <h3 class="font-headline text-2xl text-on-surface font-semibold tracking-tight">Data Actions</h3>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="bg-surface-container border border-outline-variant rounded-2xl flex flex-col h-[280px] overflow-hidden group soft-elevation">
+      <div class="p-5 border-b border-outline-variant bg-surface-container-low">
+        <h4 class="font-headline font-semibold text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">upload_file</span>
+          Upload Sales Data
+        </h4>
+      </div>
+      <div class="p-6 flex-1 flex flex-col">
+        <div id="drop-zone" class="flex-1 border-2 border-dashed border-outline-variant rounded-xl bg-surface hover:bg-surface-container-high transition-colors flex flex-col items-center justify-center cursor-pointer"
+             onclick="document.getElementById('csv-input').click()">
+          <div class="w-14 h-14 rounded-full bg-surface-container-highest flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-on-surface-variant text-3xl group-hover:text-primary transition-colors">cloud_upload</span>
+          </div>
+          <p class="font-headline text-base text-on-surface font-semibold">Drag &amp; Drop CSV</p>
+          <p class="text-xs text-on-surface-variant mt-1">or click to browse</p>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" class="hidden" />
+      </div>
+    </div>
+
+    <!-- Batch Forecast Card -->
+    <div class="bg-surface-container border border-outline-variant rounded-2xl p-6 relative overflow-hidden soft-elevation">
+      <div class="relative z-10">
+        <h4 class="font-headline text-lg font-semibold text-on-surface mb-2">Manual Forecast</h4>
+        <p class="text-sm text-on-surface-variant mb-6">Force a recalculation of all risk models based on latest data.</p>
+        <button id="run-forecast-btn"
+                class="w-full bg-primary text-on-primary font-mono text-xs uppercase tracking-wider font-bold py-4 px-4 rounded-full hover:bg-primary/90 shadow-lg shadow-primary/10 transition-all flex justify-center items-center gap-2 disabled:opacity-50">
+          <span class="material-symbols-outlined text-xl">bolt</span>
+          Run Batch Forecast
+        </button>
+      </div>
+      <div class="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
+        <span class="material-symbols-outlined text-[120px]">analytics</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const historical = {{ chart_historical|safe }};
+  const predicted  = {{ chart_predicted|safe }};
+  const upper      = {{ chart_upper|safe }};
+  const lower      = {{ chart_lower|safe }};
+
+  const labels = [];
+  for (let i = -13; i <= 14; i++) labels.push(i === 0 ? 'Today' : (i < 0 ? i + 'd' : '+' + i + 'd'));
+
+  const histData  = [...historical, ...Array(14).fill(null)];
+  const predData  = [...Array(13).fill(null), historical[13], ...predicted.slice(1)];
+  const upperData = [...Array(13).fill(null), historical[13], ...upper.slice(1)];
+  const lowerData = [...Array(13).fill(null), historical[13], ...lower.slice(1)];
+
+  const ctx = document.getElementById('forecastChart').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Confidence Band',
+          data: upperData,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(180,197,255,0.08)',
+          fill: '+1',
+          pointRadius: 0,
+          tension: 0.4,
+        },
+        {
+          label: 'Lower Band',
+          data: lowerData,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(180,197,255,0.08)',
+          fill: false,
+          pointRadius: 0,
+          tension: 0.4,
+        },
+        {
+          label: 'Historical',
+          data: histData,
+          borderColor: '#b4c5ff',
+          backgroundColor: function(ctx) {
+            const chart = ctx.chart;
+            const { ctx: c, chartArea } = chart;
+            if (!chartArea) return 'transparent';
+            const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, 'rgba(180,197,255,0.25)');
+            g.addColorStop(1, 'rgba(5,20,36,0)');
+            return g;
+          },
+          fill: 'origin',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.4,
+        },
+        {
+          label: 'Forecast',
+          data: predData,
+          borderColor: '#b4c5ff',
+          borderDash: [6, 4],
+          backgroundColor: 'transparent',
+          fill: false,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#122131',
+          titleColor: '#d4e4fa',
+          bodyColor: '#c3c6d7',
+          borderColor: '#434655',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: ctx => ctx.dataset.label + ': ' + (ctx.raw !== null ? ctx.raw + ' units' : 'n/a'),
+          }
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(67,70,85,0.3)', borderColor: '#434655' },
+          ticks: { color: '#8d90a0', font: { family: 'JetBrains Mono, monospace', size: 10 }, maxTicksLimit: 7 },
+        },
+        y: {
+          grid: { color: 'rgba(67,70,85,0.3)', borderColor: '#434655' },
+          ticks: { color: '#8d90a0', font: { family: 'JetBrains Mono, monospace', size: 10 } },
+        }
+      }
+    }
+  });
+})();
+</script>
+
+<script>
+(function() {
+  const btn = document.getElementById('run-forecast-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async function() {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-xl animate-spin">autorenew</span> Running...';
+    try {
+      const res = await fetch('{% url "run_forecast" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Analysis complete — ' + data.alerts_created + ' alerts generated');
+        setTimeout(() => location.reload(), 1800);
+      } else {
+        showToast('Analysis failed', 'error');
+      }
+    } catch(e) {
+      showToast('Network error', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-xl">bolt</span> Run Batch Forecast';
+    }
+  });
+})();
+</script>
+
+<script>
+/* ── Alert Resolve ──────────────────────────────────────────────── */
+async function resolveAlert(alertId, cardEl) {
+  try {
+    const res = await fetch(`/api/alerts/${alertId}/resolve/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+    });
+    if (res.ok) {
+      cardEl.classList.add('opacity-0', 'scale-95');
+      cardEl.style.transition = 'all 0.3s ease';
+      setTimeout(() => cardEl.remove(), 300);
+      showToast('Alert resolved');
+    }
+  } catch(e) {
+    showToast('Failed to resolve alert', 'error');
+  }
+}
+
+/* ── CSV Upload ─────────────────────────────────────────────────── */
+(function() {
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('csv-input');
+
+  ['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.add('border-primary', 'bg-surface-container-highest');
+  }));
+  ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.remove('border-primary', 'bg-surface-container-highest');
+  }));
+
+  dropZone.addEventListener('drop', ev => {
+    if (ev.dataTransfer.files.length) uploadFile(ev.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) uploadFile(fileInput.files[0]);
+  });
+
+  async function uploadFile(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch('{% url "upload" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: fd,
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Imported ${data.created} products, updated ${data.updated}${data.errors.length ? ', ' + data.errors.length + ' errors' : ''}`);
+      } else {
+        showToast(data.error || 'Upload failed', 'error');
+      }
+    } catch(e) {
+      showToast('Upload error', 'error');
+    }
+  }
+})();
+</script>
+{% endblock %}
